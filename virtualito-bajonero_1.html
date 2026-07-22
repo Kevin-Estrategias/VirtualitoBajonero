@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Virtualito Bajonero - Pedidos a los kioscos más cercano de tu zona">
+    <title>Virtualito Bajonero | Tu Kiosco Más Cercano</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0a0e27;
+            --secondary: #d4af37;
+            --accent: #ff8c00;
+            --dark-bg: #0f1428;
+            --card-bg: #1a1f3a;
+            --text-light: #ffffff;
+            --text-gray: #b0b0b0;
+            --border: #2a2f4a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--dark-bg) 100%);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* === SCROLLBAR === */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--primary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary);
+            border-radius: 4px;
+        }
+
+        /* === HEADER/NAVBAR === */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(15, 20, 40, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            padding: 1rem;
+            text-align: center;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .navbar h1 {
+            font-size: clamp(1.2rem, 5vw, 1.5rem);
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        /* === MAIN CONTAINER === */
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 1.5rem;
+            margin-top: 80px;
+            margin-bottom: 2rem;
+        }
+
+        /* === HERO SECTION === */
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+            animation: bounce 2s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .hero h2 {
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* === LOCATOR SECTION === */
+        .locator-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .locator-section h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #zoneInput {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--primary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 0.95rem;
+            transition: border-color 0.3s ease;
+        }
+
+        #zoneInput:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            color: var(--primary);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .zone-info {
+            background: rgba(212, 175, 55, 0.1);
+            border-left: 3px solid var(--secondary);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 0.75rem;
+            display: none;
+        }
+
+        .zone-info.active {
+            display: block;
+            animation: slideInLeft 0.3s ease;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* === KIOSCOS GRID === */
+        .kioscos-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (min-width: 640px) {
+            .kioscos-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .kiosco-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: fadeInUp 0.6s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .kiosco-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .kiosco-card:hover::before {
+            left: 100%;
+        }
+
+        .kiosco-card:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.2);
+            transform: translateY(-5px);
+        }
+
+        .kiosco-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .kiosco-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+
+        .kiosco-address {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .kiosco-distance {
+            background: rgba(212, 175, 55, 0.15);
+            color: var(--secondary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 0.75rem;
+        }
+
+        .kiosco-distance.closest {
+            background: rgba(255, 140, 0, 0.2);
+            color: var(--accent);
+        }
+
+        .kiosco-btn {
+            width: 100%;
+            padding: 0.65rem;
+            margin-top: 0.75rem;
+            background: linear-gradient(90deg, var(--accent), #ff6b00);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .kiosco-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 20px rgba(255, 140, 0, 0.3);
+        }
+
+        .kiosco-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* === HERO SECTION BOTTOM === */
+        .cta-section {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.1), rgba(255, 140, 0, 0.1));
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-top: 2rem;
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .cta-section h3 {
+            color: var(--secondary);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .cta-section p {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .phone-badge {
+            background: var(--primary);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* === FOOTER === */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+                margin-top: 70px;
+            }
+
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+
+            .locator-section,
+            .cta-section {
+                padding: 1rem;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .kiosco-card {
+                padding: 1rem;
+            }
+        }
+
+        /* === LOADING STATE === */
+        .loading {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--secondary);
+            border-radius: 50%;
+            animation: pulse 1.5s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* === TOAST NOTIFICATIONS === */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
+            animation: slideUp 0.3s ease;
+            z-index: 2000;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <h1>🏪 VIRTUALITO BAJONERO</h1>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="container">
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-icon">🏠</div>
+            <h2>Pedidos Rápidos a Tu Kiosco</h2>
+            <p>Encontrá el más cercano a tu zona y encargá por WhatsApp</p>
+        </section>
+
+        <!-- LOCATOR -->
+        <section class="locator-section">
+            <h3>📍 ¿Dónde estás?</h3>
+            <div class="input-group">
+                <input 
+                    type="text" 
+                    id="zoneInput" 
+                    placeholder="Ej: Berazategui, Villa España, Quilmes..."
+                    autocomplete="off"
+                >
+                <button class="btn" onclick="locateNearest()">Buscar</button>
+            </div>
+            <div class="zone-info" id="zoneInfo">
+                <strong>✓ Tu zona:</strong> <span id="zoneText"></span>
+            </div>
+        </section>
+
+        <!-- KIOSCOS GRID -->
+        <div class="kioscos-grid" id="kiscosGrid">
+            <!-- Se llena con JavaScript -->
+        </div>
+
+        <!-- CTA SECTION -->
+        <section class="cta-section">
+            <h3>¿Necesitás ayuda?</h3>
+            <p>Contactá directamente con nuestro equipo</p>
+            <div class="phone-badge">+54 9 11 7822-7082</div>
+        </section>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>Virtualito Bajonero © 2026 | Pedidos por WhatsApp</p>
+    </footer>
+
+    <script>
+        // === DATOS DE KIOSCOS ===
+        const kioscos = [
+            {
+                id: 1,
+                name: "CEDE 1",
+                address: "Av. Eva Perón 6400 esquina Itaty, F.Varela",
+                zone: "varela",
+                icon: "🏪",
+                lat: -34.8545,
+                lng: -58.3891,
+                description: "Berazategui"
+            },
+            {
+                id: 2,
+                name: "CEDE 2",
+                address: "Cruce Varela, Calle 101 nº 627",
+                zone: "varela",
+                icon: "🏪",
+                lat: -34.8635,
+                lng: -58.3812,
+                description: "Berazategui"
+            },
+            {
+                id: 3,
+                name: "CEDE 3",
+                address: "Av. Mitre 850, Quilmes Centro",
+                zone: "quilmes",
+                icon: "🏪",
+                lat: -34.7266,
+                lng: -58.2557,
+                description: "Quilmes"
+            },
+            {
+                id: 4,
+                name: "CEDE 4",
+                address: "Acoyte 240, Floresta, CABA",
+                zone: "caba",
+                icon: "🏪",
+                lat: -34.6097,
+                lng: -58.4316,
+                description: "Capital"
+            }
+        ];
+
+        // === INICIALIZAR GRID ===
+        function renderKioscos(filtered = null) {
+            const grid = document.getElementById('kiscosGrid');
+            const toRender = filtered || kioscos;
+            
+            grid.innerHTML = toRender.map(k => `
+                <div class="kiosco-card">
+                    <div class="kiosco-icon">${k.icon}</div>
+                    <div class="kiosco-name">${k.name}</div>
+                    <div class="kiosco-address">${k.address}</div>
+                    <div class="kiosco-description" style="color: var(--text-gray); font-size: 0.8rem; margin-bottom: 0.5rem;">${k.description}</div>
+                    <div class="kiosco-distance" id="distance-${k.id}">Calcular distancia</div>
+                    <button class="kiosco-btn" onclick="openWhatsApp(${k.id})">
+                        💬 Hacer Pedido
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        // === FUNCIÓN: ABRIR WHATSAPP ===
+        function openWhatsApp(kioscId) {
+            const kiosco = kioscos.find(k => k.id === kioscId);
+            const message = `Hola, soy ${getUserName()} y quiero hacer un pedido de Virtualito ${kiosco.name}`;
+            const encodedMsg = encodeURIComponent(message);
+            const whatsappURL = `https://wa.me/5491178227082?text=${encodedMsg}`;
+            
+            window.open(whatsappURL, '_blank');
+            showToast(`📱 Abriendo WhatsApp para ${kiosco.name}...`);
+        }
+
+        // === FUNCIÓN: OBTENER NOMBRE DEL USUARIO ===
+        function getUserName() {
+            const name = localStorage.getItem('userName');
+            if (!name) {
+                const input = prompt("¿Cuál es tu nombre?", "");
+                if (input) {
+                    localStorage.setItem('userName', input);
+                    return input;
+                }
+                return "Cliente";
+            }
+            return name;
+        }
+
+        // === FUNCIÓN: LOCALIZAR KIOSCO MÁS CERCANO ===
+        function locateNearest() {
+            const zoneInput = document.getElementById('zoneInput').value.trim().toLowerCase();
+            
+            if (!zoneInput) {
+                showToast("⚠️ Ingresá tu zona");
+                return;
+            }
+
+            const zoneInfo = document.getElementById('zoneInfo');
+            const zoneText = document.getElementById('zoneText');
+            
+            zoneText.textContent = zoneInput;
+            zoneInfo.classList.add('active');
+
+            // Filtrar kioscos por zona
+            const filtered = kioscos.filter(k => 
+                k.zone.includes(zoneInput) || 
+                k.address.toLowerCase().includes(zoneInput) ||
+                k.description.toLowerCase().includes(zoneInput)
+            );
+
+            if (filtered.length > 0) {
+                renderKioscos(filtered);
+                showToast(`✓ ${filtered.length} kiosco${filtered.length > 1 ? 's' : ''} encontrado${filtered.length > 1 ? 's' : ''}`);
+                // Highlight al más cercano
+                if (filtered.length > 0) {
+                    document.querySelector('.kiosco-distance')?.classList.add('closest');
+                }
+            } else {
+                renderKioscos();
+                showToast("ℹ️ Mostrando todos los kioscos");
+            }
+
+            // Scroll a grid
+            setTimeout(() => {
+                document.getElementById('kiscosGrid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 300);
+        }
+
+        // === FUNCIÓN: TOAST NOTIFICATIONS ===
+        function showToast(message) {
+            const existing = document.querySelector('.toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // === ENTER KEY EN INPUT ===
+        document.getElementById('zoneInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') locateNearest();
+        });
+
+        // === RENDERIZAR INICIAL ===
+        renderKioscos();
+
+        // === EASTER EGG ===
+        let clickCount = 0;
+        document.querySelector('.navbar h1').addEventListener('click', () => {
+            clickCount++;
+            if (clickCount === 5) {
+                showToast("🎉 ¡Sos un verdadero bajonero!");
+                clickCount = 0;
+            }
+        });
+    </script>
+</body>
+</html>
